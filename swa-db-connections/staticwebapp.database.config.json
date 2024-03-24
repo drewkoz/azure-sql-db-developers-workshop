@@ -115,10 +115,24 @@
           "role": "anonymous",
           "actions": [
             {
-              "action": "*"
-            }
+              "action": "*",
+              "policy": {
+                "database": "@item.owner_id eq 'public'"
+              }
+            }            
           ]
-        }
+        },
+        {
+          "role": "authenticated",
+          "actions": [
+            {
+              "action": "*",
+              "policy": {
+                "database": "@item.owner_id eq @claims.userId"
+              }
+            }            
+          ]
+        }        
       ],
       "mappings": {
         "position": "order"
@@ -148,7 +162,7 @@
       },
       "permissions": [
         {
-          "role": "anonymous",
+          "role": "authenticated",
           "actions": [
             {
               "action": "execute"

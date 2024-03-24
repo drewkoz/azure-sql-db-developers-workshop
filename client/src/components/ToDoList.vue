@@ -48,6 +48,9 @@
 import UserInfo from './UserInfo.vue'
 
 const API = "/data-api/rest/todo";
+const API_INSERT = "/data-api/rest/insert_todo";
+const API_UPDATE = "/data-api/rest/update_todo";
+const API_DELETE = "/data-api/rest/delete_todo";
 const HEADERS = { 'Accept': 'application/json', 'Content-Type': 'application/json;charset=utf-8' };
 
 var filters = {
@@ -151,16 +154,16 @@ export default {
 
       const userId = this.userId ?? "public";
       
-      await fetch(API + `/id/${destTodo.id}`, {
+      await fetch(API_UPDATE, {
           headers: HEADERS,
-          method: "PATCH",
-          body: JSON.stringify({ order: destTodo.order, owner_id: userId })
+          method: "POST",
+          body: JSON.stringify({ order: destTodo.order, owner_id: userId, id: destTodo.id, completed: destTodo.completed, title: destTodo.title })
         });
 
-      await fetch(API + `/id/${sourceTodo.id}`, {
+      await fetch(API_UPDATE, {
           headers: HEADERS,
-          method: "PATCH",
-          body: JSON.stringify({ order: sourceTodo.order, owner_id: userId })
+          method: "POST",
+          body: JSON.stringify({ order: sourceTodo.order, owner_id: userId, id: sourceId, completed: sourceTodo.completed, title: sourceTodo.title })
         });
     },
 
@@ -186,7 +189,7 @@ export default {
       var value = this.newTodo && this.newTodo.trim();
       if (!value) return;
 
-      fetch(API, {
+      fetch(API_INSERT, {
         headers: HEADERS,
         method: "POST",
         body: JSON.stringify({ title: value, order: this.todos.length+1, owner_id: this.userId ?? "public" })
@@ -196,22 +199,23 @@ export default {
           return res.json();
         }
       }).then(res => {
-        this.todos.push(res.value[0]);
+        this.getTodos();
       })
     },
 
     completeTodo: function (todo) {
-      fetch(API + `/id/${todo.id}`, {
+      fetch(API_UPDATE, {
         headers: HEADERS,
-        method: "PATCH",
-        body: JSON.stringify({ completed: todo.completed, order: todo.order, owner_id: this.userId ?? "public" })
+        method: "POST",
+        body: JSON.stringify({ id: todo.id, completed: todo.completed, order: todo.order, owner_id: this.userId ?? "public", title: todo.title })
       });
     },
 
     removeTodo: function (todo) {
-      fetch(API + `/id/${todo.id}`, {
+      fetch(API_DELETE, {
         headers: HEADERS,
-        method: "DELETE"
+        method: "DELETE",
+        body: JSON.stringify({ owner_id: this.userId ?? "public", id: todo.id })
       }).then(res => {
         if (res.ok) {
           var index = this.todos.indexOf(todo);
@@ -234,10 +238,10 @@ export default {
       if (!todo.title) {
         this.removeTodo(todo);
       } else {
-        fetch(API + `/id/${todo.id}`, {
+        fetch(API_UPDATE , {
           headers: HEADERS,
-          method: "PATCH",
-          body: JSON.stringify({ title: todo.title, order: todo.order, owner_id: this.userId ?? "public" })
+          method: "POST",
+          body: JSON.stringify({id: todo.id, title: todo.title, order: todo.order, owner_id: this.userId ?? "public", title: todo.title })
         });
       }
     },
